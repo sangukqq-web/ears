@@ -2,69 +2,234 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b16">
 <title>간이 청력 테스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif; }
-  .view { display: none; }
-  .view.active { display: block; }
+  :root {
+    --bg: #070b16;
+    --line: rgba(255,255,255,.09);
+    --surface: rgba(255,255,255,.045);
+    --surface-2: rgba(255,255,255,.08);
+    --text: #e9edf6;
+    --muted: #8f99b0;
+    --faint: #5f6a84;
+    --gold: #e3c995;
+    --gold-2: #b8955a;
+    --teal: #6ee7d0;
+    --rose: #fb7185;
+    --sky: #60a5fa;
+    --serif: 'Noto Serif KR', 'Iowan Old Style', Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    -webkit-font-smoothing: antialiased; letter-spacing: -0.005em;
+  }
+  .serif { font-family: var(--serif); }
+  .muted { color: var(--muted); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* 배경 */
+  .bg-fx { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(99,102,241,.16), transparent 60%),
+      radial-gradient(900px 600px at -10% 20%, rgba(45,212,191,.10), transparent 60%),
+      linear-gradient(180deg, #070b16, #060914 60%, #04060d); }
+  .orb { position: absolute; border-radius: 9999px; filter: blur(80px); opacity: .5; animation: drift 22s ease-in-out infinite alternate; }
+  .orb.a { width: 380px; height: 380px; left: -120px; top: 40%; background: rgba(227,201,149,.14); }
+  .orb.b { width: 420px; height: 420px; right: -160px; top: 8%; background: rgba(96,165,250,.14); animation-delay: -8s; }
+  @keyframes drift { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(40px,-30px,0) scale(1.15); } }
+  .bg-fx::after { content:''; position:absolute; inset:0; opacity:.035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  /* 카드 / 버튼 */
+  .card { background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+    border: 1px solid var(--line); border-radius: 26px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 40px 70px -40px rgba(0,0,0,.8); }
+  .eyebrow { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  .h-title { font-family: var(--serif); font-weight: 500; letter-spacing: -.01em; }
   .tap { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
-  @keyframes breathe { 0%,100% { transform: scale(.9); opacity: .45; } 50% { transform: scale(1.06); opacity: 1; } }
-  .breathe { animation: breathe 3.2s ease-in-out infinite; }
-  .mode-card:has(input:checked) { border-color: #4f46e5; background: #eef2ff; }
-  #resp-btn.flash { background: #15803d; transform: scale(.98); }
-  @media print { .no-print { display: none !important; } body { background: #fff; } }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: 16px; font-weight: 600; transition: transform .18s, filter .18s, background .18s, box-shadow .18s; cursor: pointer; }
+  .btn-primary { background: linear-gradient(135deg, #f6e8c6 0%, #dcbc83 55%, #c49c5c 100%); color: #1b1407; box-shadow: 0 14px 34px -14px rgba(214,177,106,.65), 0 1px 0 rgba(255,255,255,.5) inset; }
+  .btn-primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0) scale(.99); }
+  .btn-primary:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; transform: none; filter: grayscale(.4); }
+  .btn-ghost { border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+  .btn-ghost:hover { background: var(--surface-2); border-color: rgba(255,255,255,.16); }
+  .btn-dark { background: rgba(255,255,255,.08); border: 1px solid var(--line); color: var(--text); }
+  .btn-dark:hover { background: rgba(255,255,255,.13); }
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--line), transparent); }
+  input[type=checkbox] { accent-color: #d9bd86; width: 17px; height: 17px; flex: none; }
+  .pill { display:inline-flex; align-items:center; gap:.4rem; padding:.28rem .7rem; border-radius:9999px; font-size:12px; font-weight:600; background: var(--surface-2); border:1px solid var(--line); }
+  .chip { display:inline-block; padding:.12rem .6rem; border-radius:9999px; font-size:12px; font-weight:600; border:1px solid rgba(255,255,255,.06); }
+
+  /* 화면 전환 */
+  .view { display: none; }
+  .view.active { display: block; animation: rise .5s cubic-bezier(.2,.7,.2,1); }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  /* 스텝바 */
+  .step { display:flex; align-items:center; gap:.45rem; color: var(--faint); font-size: 12px; }
+  .step .n { width: 22px; height: 22px; border-radius: 9999px; display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 700; border: 1px solid var(--line); background: var(--surface); }
+  .step.on { color: var(--text); font-weight: 600; }
+  .step.on .n { background: linear-gradient(135deg,#f6e8c6,#c49c5c); color:#1b1407; border-color: transparent; box-shadow: 0 0 18px -2px rgba(227,201,149,.6); }
+  .step.done { color: var(--muted); }
+  .step.done .n { border-color: rgba(227,201,149,.5); color: var(--gold); }
+  .bar { width: 26px; height: 1px; background: var(--line); }
+  .bar.done { background: rgba(227,201,149,.55); }
+
+  /* 모드 카드 */
+  .mode-card { position: relative; cursor: pointer; display: block; padding: 18px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); transition: .2s; }
+  .mode-card:hover { background: var(--surface-2); }
+  .mode-card .chk { position:absolute; right:14px; top:14px; width:20px; height:20px; border-radius:9999px; border:1.5px solid var(--faint); display:flex; align-items:center; justify-content:center; font-size:11px; color:transparent; transition:.2s; }
+  .mode-card:has(input:checked) { border-color: rgba(227,201,149,.65); background: linear-gradient(180deg, rgba(227,201,149,.13), rgba(227,201,149,.03)); box-shadow: 0 0 0 1px rgba(227,201,149,.2), 0 20px 40px -24px rgba(227,201,149,.35); }
+  .mode-card:has(input:checked) .chk { background: var(--gold); border-color: var(--gold); color: #1b1407; font-weight: 800; }
+
+  /* 안내 박스 */
+  .notice { border: 1px solid rgba(250,204,21,.25); background: linear-gradient(180deg, rgba(250,204,21,.09), rgba(250,204,21,.03)); border-radius: 20px; color: #f1e3b0; }
+  .feature { display:flex; align-items:center; gap:.45rem; font-size:12px; color: var(--muted); }
+  .feature i { width:6px; height:6px; border-radius:9999px; background: var(--gold); box-shadow: 0 0 10px var(--gold); display:inline-block; }
+  .li-dot { list-style: none; position: relative; padding-left: 20px; }
+  .li-dot::before { content:''; position:absolute; left:2px; top:.62em; width:6px; height:6px; border-radius:9999px; background: var(--gold); opacity:.8; }
+
+  /* 검사 화면 */
+  .prog { height: 4px; border-radius: 9999px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .prog > div { height: 100%; width: 0; border-radius: 9999px; background: linear-gradient(90deg, var(--gold-2), #f6e8c6); box-shadow: 0 0 14px rgba(227,201,149,.7); transition: width .5s cubic-bezier(.2,.7,.2,1); }
+  .stage { --sc: #e3c995; position: relative; width: 240px; height: 240px; margin: 26px auto 18px; }
+  .ring { position: absolute; inset: 0; border-radius: 9999px; border: 1px solid var(--sc); opacity: 0; animation: ripple 6s cubic-bezier(.2,.6,.3,1) infinite; }
+  .ring:nth-child(2) { animation-delay: 2s; } .ring:nth-child(3) { animation-delay: 4s; }
+  @keyframes ripple { 0% { transform: scale(.4); opacity: 0; } 15% { opacity: .55; } 100% { transform: scale(1); opacity: 0; } }
+  .core { position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 9999px;
+    background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.55), var(--sc) 48%, rgba(0,0,0,.55) 110%);
+    box-shadow: 0 0 70px -6px var(--sc), 0 0 0 8px rgba(255,255,255,.04), 0 0 0 9px rgba(255,255,255,.06);
+    display:flex; align-items:center; justify-content:center; animation: breathe 4s ease-in-out infinite; transition: background .4s, box-shadow .4s; }
+  .core span { font-family: var(--serif); font-size: 30px; font-weight: 700; color: rgba(8,10,20,.82); }
+  @keyframes breathe { 0%,100% { transform: scale(.94); } 50% { transform: scale(1.05); } }
+  #resp-btn { width: 100%; padding: 26px 0 22px; border-radius: 24px; border: 1px solid rgba(110,231,208,.38);
+    background: linear-gradient(180deg, rgba(110,231,208,.18), rgba(110,231,208,.05)); color: #d3fbf1; font-size: 1.3rem; font-weight: 700;
+    box-shadow: 0 20px 44px -26px rgba(110,231,208,.7), 0 1px 0 rgba(255,255,255,.08) inset; transition: transform .12s, background .12s, box-shadow .12s; }
+  #resp-btn small { display:block; margin-top:4px; font-size:11px; font-weight:500; opacity:.6; letter-spacing:.06em; }
+  #resp-btn.flash { background: linear-gradient(180deg, rgba(110,231,208,.6), rgba(110,231,208,.28)); transform: scale(.985); box-shadow: 0 0 46px -4px rgba(110,231,208,.75); }
+
+  /* 오버레이 */
+  #overlay { background: rgba(3,5,12,.74); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  #ov-badge { --sc: #e3c995; width: 92px; height: 92px; margin: 0 auto 16px; border-radius: 9999px; display:flex; align-items:center; justify-content:center;
+    font-family: var(--serif); font-size: 38px; font-weight: 700; color: rgba(8,10,20,.85);
+    background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.55), var(--sc) 50%, rgba(0,0,0,.5) 115%);
+    box-shadow: 0 0 60px -6px var(--sc), 0 0 0 8px rgba(255,255,255,.04); }
+
+  /* 결과 */
+  .ear-card { border: 1px solid var(--line); border-radius: 22px; padding: 18px 12px 16px; text-align: center; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); position: relative; overflow: hidden; }
+  .ear-card::before { content:''; position:absolute; inset:-40% -20% auto; height:70%; background: radial-gradient(closest-side, var(--gl, transparent), transparent); opacity:.16; pointer-events:none; }
+  .gauge { position: relative; width: 116px; height: 116px; margin: 8px auto 10px; }
+  .gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .gauge .v { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
+  .gauge .v b { font-family: var(--serif); font-size: 30px; font-weight: 500; }
+  .gauge .v em { font-style: normal; font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .tbl { width: 100%; font-size: 14px; border-collapse: collapse; }
+  .tbl th { font-size: 11px; font-weight: 600; letter-spacing: .1em; color: var(--faint); text-transform: uppercase; padding: 6px 0; text-align: center; }
+  .tbl th:first-child, .tbl td:first-child { text-align: left; }
+  .tbl td { padding: 9px 0; text-align: center; border-top: 1px solid var(--line); }
+  .ico { width: 22px; height: 22px; flex: none; border-radius: 9999px; display:flex; align-items:center; justify-content:center; font-size: 12px; font-weight: 800; margin-top: 1px; }
+  .ico.ok { background: rgba(74,222,128,.16); color: #4ade80; }
+  .ico.warn { background: rgba(250,204,21,.16); color: #facc15; }
+  .hist { width:100%; text-align:left; display:flex; justify-content:space-between; gap:10px; padding: 11px 14px; border-radius: 14px; border:1px solid var(--line); background: var(--surface); font-size: 13px; transition: .15s; }
+  .hist:hover { background: var(--surface-2); }
+  .agecell { border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 14px; }
+  .hfchip { border-radius: 14px; padding: 9px 14px; text-align: center; font-size: 11px; border: 1px solid rgba(255,255,255,.06); min-width: 64px; }
+  .hfchip b { display:block; font-size: 14px; margin-bottom: 1px; }
+  .hero-hf { border-radius: 24px; border: 1px solid rgba(227,201,149,.28); text-align: center; padding: 30px 12px;
+    background: radial-gradient(500px 220px at 50% 0%, rgba(227,201,149,.18), transparent 70%), rgba(255,255,255,.02); }
+  .tip { font-size: 12px; color: var(--muted); border: 1px solid var(--line); background: rgba(255,255,255,.03); border-radius: 16px; padding: 13px 15px; line-height: 1.65; }
+  #toast { background: rgba(20,26,44,.92); border: 1px solid var(--line); backdrop-filter: blur(12px); color: var(--text); box-shadow: 0 20px 40px -16px rgba(0,0,0,.8); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  @media print {
+    :root { --bg:#fff; --line:#d7dbe4; --surface:#f6f7fa; --surface-2:#eef0f5; --text:#111827; --muted:#4b5563; --faint:#6b7280; --gold:#8a6a2d; }
+    body { background:#fff; color:#111; }
+    .bg-fx, .no-print { display:none !important; }
+    .card, .ear-card { background:#fff !important; box-shadow:none !important; backdrop-filter:none; border-color:#d7dbe4 !important; }
+    .bt { filter: brightness(.55) saturate(1.3); }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
 </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-<div class="max-w-2xl mx-auto px-4 py-6">
+<body>
+<div class="bg-fx"><div class="orb a"></div><div class="orb b"></div></div>
 
-  <header class="text-center mb-4 no-print">
-    <h1 class="text-2xl font-bold">🎧 간이 청력 테스트</h1>
-    <p class="text-sm text-slate-500 mt-1">주파수별 순음으로 좌우 청력을 대략 확인합니다 · 소리와 결과는 이 기기 안에서만 처리됩니다</p>
+<div class="max-w-2xl mx-auto px-4 pt-8 pb-10" style="padding-bottom:max(2.5rem,env(safe-area-inset-bottom))">
+
+  <header class="text-center mb-6 no-print">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.02));border:1px solid var(--line);box-shadow:0 0 40px -10px rgba(227,201,149,.5)">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6e8c6"/><stop offset="1" stop-color="#c49c5c"/></linearGradient></defs>
+        <path d="M3 16h3M26 16h3M9 11v10M14 6v20M19 10v12M24 13v6" stroke="url(#lg)" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="eyebrow mb-2">Hearing Screening</div>
+    <h1 class="h-title text-3xl sm:text-4xl">간이 청력 테스트</h1>
+    <p class="text-sm muted mt-3 leading-relaxed">주파수별 순음으로 좌우 청력을 대략 확인합니다.<br class="hidden sm:block"> 소리와 결과는 이 기기 안에서만 처리됩니다.</p>
   </header>
 
-  <ol id="steps" class="flex items-center justify-center gap-2 text-xs mb-5 no-print"></ol>
+  <ol id="steps" class="flex items-center justify-center gap-2.5 mb-6 no-print"></ol>
 
   <!-- 1. 안내 -->
   <section id="v-intro" class="view active space-y-4">
-    <div class="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-      <b>의료 진단이 아닙니다.</b> 일반 헤드폰은 소리 크기가 보정되어 있지 않아, 이 검사는 "1kHz 기준 상대 비교"로 추정한 <b>간이 선별 결과</b>입니다.
+    <div class="notice p-4 text-sm leading-relaxed">
+      <b class="text-[#f6e8b8]">의료 진단이 아닙니다.</b> 일반 헤드폰은 소리 크기가 보정되어 있지 않아, 이 검사는 "1kHz 기준 상대 비교"로 추정한 <b>간이 선별 결과</b>입니다.
       이명·어지럼·갑작스러운 청력 변화가 있으면 결과와 상관없이 이비인후과에서 청력검사를 받으세요.
     </div>
 
-    <div class="rounded-2xl bg-white border border-slate-200 p-5">
-      <h2 class="font-bold mb-2">검사 전 준비</h2>
-      <ul class="text-sm text-slate-600 space-y-1.5 list-disc pl-5">
-        <li><b>유선 헤드폰·이어폰</b>을 쓰세요. 블루투스는 아주 작은 소리를 잘라 먹을 수 있습니다.</li>
-        <li>조용한 방에서 하고, 노이즈 캔슬링·이퀄라이저·공간음향은 끄세요.</li>
-        <li>기기 볼륨은 <b>낮게</b> 시작합니다(다음 화면에서 맞춥니다).</li>
-        <li>소리가 <b>아주 작게</b> 들릴 수 있습니다. 들렸다 싶으면 바로 버튼을 누르세요. 추측으로 누르면 정확도가 떨어집니다.</li>
+    <div class="card p-6">
+      <div class="eyebrow mb-1">Before you begin</div>
+      <h2 class="h-title text-xl mb-4">검사 전 준비</h2>
+      <ul class="text-sm space-y-2.5 muted leading-relaxed">
+        <li class="li-dot"><b class="text-[var(--text)]">유선 헤드폰·이어폰</b>을 쓰세요. 블루투스는 아주 작은 소리를 잘라 먹을 수 있습니다.</li>
+        <li class="li-dot">조용한 방에서 하고, 노이즈 캔슬링·이퀄라이저·공간음향은 끄세요.</li>
+        <li class="li-dot">기기 볼륨은 <b class="text-[var(--text)]">낮게</b> 시작합니다(다음 화면에서 맞춥니다).</li>
+        <li class="li-dot">소리가 <b class="text-[var(--text)]">아주 작게</b> 들릴 수 있습니다. 들렸다 싶으면 바로 버튼을 누르세요. 추측으로 누르면 정확도가 떨어집니다.</li>
       </ul>
+      <div class="divider my-5"></div>
+      <div class="flex flex-wrap gap-x-5 gap-y-2">
+        <span class="feature"><i></i>서버 전송 없음</span>
+        <span class="feature"><i></i>좌우 귀 개별 측정</span>
+        <span class="feature"><i></i>청력도 그래프</span>
+      </div>
     </div>
 
-    <div class="rounded-2xl bg-white border border-slate-200 p-5">
-      <h2 class="font-bold mb-3">검사 종류</h2>
+    <div class="card p-6">
+      <div class="eyebrow mb-1">Test type</div>
+      <h2 class="h-title text-xl mb-4">검사 종류</h2>
       <div class="grid sm:grid-cols-2 gap-3">
-        <label class="mode-card cursor-pointer rounded-xl border-2 border-slate-200 p-4 block">
+        <label class="mode-card">
           <input type="radio" name="mode" value="std" class="sr-only" checked>
+          <span class="chk">✓</span>
           <div class="font-semibold">표준 간이 검사</div>
-          <div class="text-xs text-slate-500 mt-1">250Hz ~ 8kHz · 오른쪽/왼쪽 각각 · 약 6~8분 · 청력도 그래프 제공</div>
+          <div class="text-xs muted mt-1.5 leading-relaxed">250Hz ~ 8kHz · 오른쪽/왼쪽 각각<br>약 6~8분 · 청력도 그래프 제공</div>
         </label>
-        <label class="mode-card cursor-pointer rounded-xl border-2 border-slate-200 p-4 block">
+        <label class="mode-card">
           <input type="radio" name="mode" value="hf" class="sr-only">
+          <span class="chk">✓</span>
           <div class="font-semibold">고음 가청 한계 테스트</div>
-          <div class="text-xs text-slate-500 mt-1">8kHz ~ 20kHz · 양쪽 동시 · 약 2분 · 들리는 최고 주파수 확인</div>
+          <div class="text-xs muted mt-1.5 leading-relaxed">8kHz ~ 20kHz · 양쪽 동시<br>약 2분 · 들리는 최고 주파수 확인</div>
         </label>
       </div>
-      <button id="btn-to-setup" class="tap mt-4 w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white py-3 font-semibold">다음: 볼륨·좌우 확인</button>
+      <button id="btn-to-setup" class="btn btn-primary tap mt-5 w-full py-4 text-[15px]">다음 · 볼륨과 좌우 확인 →</button>
     </div>
 
-    <div id="history-wrap" class="rounded-2xl bg-white border border-slate-200 p-5 hidden">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="font-bold">최근 기록</h2>
-        <button id="btn-clear-history" class="text-xs text-slate-400 hover:text-red-500">기록 삭제</button>
+    <div id="history-wrap" class="card p-6 hidden">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="h-title text-lg">최근 기록</h2>
+        <button id="btn-clear-history" class="text-xs muted hover:text-rose-400 transition">기록 삭제</button>
       </div>
       <div id="history" class="space-y-2"></div>
     </div>
@@ -72,61 +237,59 @@
 
   <!-- 2. 준비 -->
   <section id="v-setup" class="view space-y-4">
-    <div class="rounded-2xl bg-white border border-slate-200 p-5">
-      <h2 class="font-bold mb-1">① 볼륨 맞추기</h2>
-      <ol class="text-sm text-slate-600 list-decimal pl-5 space-y-1 mb-3">
-        <li>기기 볼륨을 <b>가장 낮게</b> 내리고 헤드폰을 착용합니다.</li>
-        <li>아래 기준음을 재생하고, 볼륨을 <b>천천히</b> 올려 "작지만 또렷하게" 들리는 곳에서 멈춥니다.</li>
-        <li>이후에는 <b>볼륨을 절대 바꾸지 마세요.</b> (결과 기준이 달라집니다)</li>
+    <div class="card p-6">
+      <div class="flex items-center gap-3 mb-3"><span class="pill num">01</span><h2 class="h-title text-xl">볼륨 맞추기</h2></div>
+      <ol class="text-sm muted space-y-2 mb-4 leading-relaxed">
+        <li class="li-dot">기기 볼륨을 <b class="text-[var(--text)]">가장 낮게</b> 내리고 헤드폰을 착용합니다.</li>
+        <li class="li-dot">아래 기준음을 재생하고, 볼륨을 <b class="text-[var(--text)]">천천히</b> 올려 "작지만 또렷하게" 들리는 곳에서 멈춥니다.</li>
+        <li class="li-dot">이후에는 <b class="text-[var(--text)]">볼륨을 절대 바꾸지 마세요.</b> (결과 기준이 달라집니다)</li>
       </ol>
-      <button id="cal-toggle" class="tap w-full rounded-xl bg-slate-800 hover:bg-slate-900 text-white py-3 font-semibold">▶ 기준음(1kHz) 재생</button>
-      <label class="flex items-start gap-2 mt-3 text-sm"><input id="chk-vol" type="checkbox" class="mt-1">
-        <span>소리가 작지만 또렷하게 들리도록 맞췄고, 검사 중 볼륨을 바꾸지 않겠습니다.</span></label>
+      <button id="cal-toggle" class="btn btn-dark tap w-full py-3.5">▶ 기준음(1kHz) 재생</button>
+      <label class="flex items-start gap-2.5 mt-4 text-sm cursor-pointer"><input id="chk-vol" type="checkbox" class="mt-0.5">
+        <span class="muted">소리가 작지만 또렷하게 들리도록 맞췄고, 검사 중 볼륨을 바꾸지 않겠습니다.</span></label>
     </div>
 
-    <div class="rounded-2xl bg-white border border-slate-200 p-5">
-      <h2 class="font-bold mb-1">② 좌우 확인</h2>
-      <p class="text-sm text-slate-600 mb-3">버튼을 눌러 해당 쪽 귀에서만 소리가 나는지 확인하세요.</p>
+    <div class="card p-6">
+      <div class="flex items-center gap-3 mb-3"><span class="pill num">02</span><h2 class="h-title text-xl">좌우 확인</h2></div>
+      <p class="text-sm muted mb-4">버튼을 눌러 해당 쪽 귀에서만 소리가 나는지 확인하세요.</p>
       <div class="grid grid-cols-2 gap-3">
-        <button id="lr-l" class="tap rounded-xl border-2 border-blue-300 text-blue-700 py-3 font-semibold hover:bg-blue-50">왼쪽 소리</button>
-        <button id="lr-r" class="tap rounded-xl border-2 border-red-300 text-red-700 py-3 font-semibold hover:bg-red-50">오른쪽 소리</button>
+        <button id="lr-l" class="btn tap py-3.5" style="border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.1);color:#bcd6ff">왼쪽 소리</button>
+        <button id="lr-r" class="btn tap py-3.5" style="border:1px solid rgba(251,113,133,.4);background:rgba(251,113,133,.1);color:#ffc2cb">오른쪽 소리</button>
       </div>
-      <label class="flex items-start gap-2 mt-3 text-sm"><input id="chk-lr" type="checkbox" class="mt-1">
-        <span>왼쪽·오른쪽 소리가 각각 맞는 귀에서 들립니다.</span></label>
+      <label class="flex items-start gap-2.5 mt-4 text-sm cursor-pointer"><input id="chk-lr" type="checkbox" class="mt-0.5">
+        <span class="muted">왼쪽·오른쪽 소리가 각각 맞는 귀에서 들립니다.</span></label>
     </div>
 
-    <div class="rounded-xl bg-slate-100 p-3 text-xs text-slate-500">
-      소리가 불편하게 크거나 귀가 아프면 즉시 중단하세요. 검사음은 안전을 위해 프로그램에서 상한이 제한됩니다.
-    </div>
+    <div class="tip">소리가 불편하게 크거나 귀가 아프면 즉시 중단하세요. 검사음은 안전을 위해 프로그램에서 상한이 제한됩니다.</div>
     <div class="flex gap-3">
-      <button id="btn-back-intro" class="tap flex-1 rounded-xl border border-slate-300 py-3 font-semibold">이전</button>
-      <button id="btn-begin" disabled class="tap flex-[2] rounded-xl bg-indigo-600 text-white py-3 font-semibold disabled:opacity-40 disabled:cursor-not-allowed">검사 시작</button>
+      <button id="btn-back-intro" class="btn btn-ghost tap flex-1 py-3.5">이전</button>
+      <button id="btn-begin" disabled class="btn btn-primary tap flex-[2] py-3.5">검사 시작</button>
     </div>
   </section>
 
   <!-- 3. 검사 -->
   <section id="v-test" class="view">
-    <div class="rounded-2xl bg-white border border-slate-200 p-5 text-center">
-      <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
-        <span id="t-ear" class="font-semibold text-slate-700"></span>
-        <span id="t-freq"></span>
+    <div class="card p-6 text-center">
+      <div class="flex items-center justify-between mb-4">
+        <span id="t-ear" class="pill"></span>
+        <span id="t-freq" class="text-xs muted num tracking-wider"></span>
       </div>
-      <div class="h-2 rounded-full bg-slate-100 overflow-hidden mb-6"><div id="t-bar" class="h-full bg-indigo-500 transition-all" style="width:0%"></div></div>
+      <div class="prog"><div id="t-bar"></div></div>
 
-      <div class="flex justify-center my-6">
-        <div class="breathe w-28 h-28 rounded-full bg-indigo-100 flex items-center justify-center">
-          <div class="w-14 h-14 rounded-full bg-indigo-300"></div>
-        </div>
+      <div id="stage" class="stage">
+        <span class="ring"></span><span class="ring"></span><span class="ring"></span>
+        <div class="core"><span id="t-side">♪</span></div>
       </div>
-      <p id="t-msg" class="text-sm text-slate-600 mb-5" aria-live="polite">
-        조용히 집중하세요. 아주 작은 소리라도 <b>들렸다고 느끼면</b> 바로 버튼을 누르세요.<br>
-        <span class="text-slate-400">화면에는 소리 신호가 표시되지 않습니다. 오직 귀로만 판단하세요.</span>
+
+      <p id="t-msg" class="text-sm muted mb-6 leading-relaxed" aria-live="polite">
+        조용히 집중하세요. 아주 작은 소리라도 <b class="text-[var(--text)]">들렸다고 느끼면</b> 바로 버튼을 누르세요.<br>
+        <span class="text-xs" style="color:var(--faint)">화면에는 소리 신호가 표시되지 않습니다. 오직 귀로만 판단하세요.</span>
       </p>
 
-      <button id="resp-btn" tabindex="-1" aria-label="소리가 들렸어요" class="tap w-full rounded-2xl bg-emerald-600 text-white text-xl font-bold py-8 transition">
-        들렸어요 <span class="block text-xs font-normal opacity-80 mt-1">(Space / Enter)</span>
+      <button id="resp-btn" tabindex="-1" aria-label="소리가 들렸어요" class="tap">
+        들렸어요 <small>SPACE · ENTER</small>
       </button>
-      <button id="btn-stop" class="tap mt-4 text-sm text-slate-500 hover:text-red-600 underline">검사 중단</button>
+      <button id="btn-stop" class="tap mt-5 text-xs muted hover:text-rose-400 transition underline underline-offset-4">검사 중단</button>
     </div>
   </section>
 
@@ -135,22 +298,22 @@
     <div id="result-body"></div>
   </section>
 
-  <footer class="text-center text-xs text-slate-400 mt-8 no-print">
-    이 도구는 선별·참고용이며 의료기기가 아닙니다. 정확한 청력 평가는 전문 의료기관의 순음청력검사로 확인하세요.
+  <footer class="text-center text-[11px] mt-10 no-print leading-relaxed" style="color:var(--faint)">
+    이 도구는 선별·참고용이며 의료기기가 아닙니다.<br>정확한 청력 평가는 전문 의료기관의 순음청력검사로 확인하세요.
   </footer>
 </div>
 
 <!-- 안내 오버레이 -->
-<div id="overlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 p-4">
-  <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
-    <div id="ov-badge" class="text-5xl font-black mb-2"></div>
-    <h3 id="ov-title" class="text-xl font-bold"></h3>
-    <p id="ov-text" class="text-slate-600 mt-2 text-sm"></p>
-    <button id="ov-btn" class="tap mt-5 w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white py-3 font-semibold">시작</button>
+<div id="overlay" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+  <div class="card p-7 max-w-sm w-full text-center" style="background:linear-gradient(180deg,rgba(28,34,56,.96),rgba(14,18,32,.96))">
+    <div id="ov-badge"></div>
+    <h3 id="ov-title" class="h-title text-2xl"></h3>
+    <p id="ov-text" class="muted mt-3 text-sm leading-relaxed"></p>
+    <button id="ov-btn" class="btn btn-primary tap mt-6 w-full py-3.5">시작</button>
   </div>
 </div>
 
-<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-[60] hidden max-w-[90vw] rounded-xl bg-slate-900 text-white text-sm px-4 py-2 shadow-lg"></div>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-[60] hidden max-w-[90vw] rounded-2xl text-sm px-5 py-3"></div>
 
 <script>
 'use strict';
@@ -164,12 +327,13 @@ const MIN_DB = -90, MAX_DB = -10;      // 검사음 범위(dBFS). MAX_DB는 코�
 const CAL_DB = -50;                    // 볼륨 맞춤용 기준음
 const HF_DB = -12;                     // 고음 테스트 고정 레벨
 const BANDS = [
-  { max: 25,  name: '정상 범위', c: '#15803d', bg: '#dcfce7' },
-  { max: 40,  name: '경도 저하', c: '#a16207', bg: '#fef9c3' },
-  { max: 55,  name: '중등도 저하', c: '#c2410c', bg: '#ffedd5' },
-  { max: 70,  name: '중고도 저하', c: '#b91c1c', bg: '#fee2e2' },
-  { max: 999, name: '고도 이상', c: '#7e22ce', bg: '#f3e8ff' },
+  { max: 25,  name: '정상 범위',   c: '#4ade80', bg: 'rgba(74,222,128,.13)',  z: 'rgba(74,222,128,.08)' },
+  { max: 40,  name: '경도 저하',   c: '#facc15', bg: 'rgba(250,204,21,.13)',  z: 'rgba(250,204,21,.07)' },
+  { max: 55,  name: '중등도 저하', c: '#fb923c', bg: 'rgba(251,146,60,.14)',  z: 'rgba(251,146,60,.08)' },
+  { max: 70,  name: '중고도 저하', c: '#f87171', bg: 'rgba(248,113,113,.14)', z: 'rgba(248,113,113,.08)' },
+  { max: 999, name: '고도 이상',   c: '#c084fc', bg: 'rgba(192,132,252,.14)', z: 'rgba(192,132,252,.08)' },
 ];
+const SIDE_COL = { R: '#fb7185', L: '#60a5fa', B: '#e3c995' };
 const HIST_KEY = 'hearing-test-history-v1';
 
 const $ = s => document.querySelector(s);
@@ -232,8 +396,7 @@ const STEP_NAMES = ['안내', '준비', '검사', '결과'];
 const VIEW_STEP = { 'v-intro': 0, 'v-setup': 1, 'v-test': 2, 'v-result': 3 };
 function renderSteps(active) {
   $('#steps').innerHTML = STEP_NAMES.map((n, i) =>
-    `<li class="flex items-center gap-1.5"><span class="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${i <= active ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'}">${i + 1}</span>
-     <span class="${i === active ? 'font-semibold text-slate-800' : 'text-slate-400'}">${n}</span></li>${i < 3 ? '<li class="w-6 h-px bg-slate-300"></li>' : ''}`).join('');
+    `<li class="step ${i < active ? 'done' : i === active ? 'on' : ''}"><span class="n">${i < active ? '✓' : i + 1}</span><span>${n}</span></li>${i < 3 ? `<li class="bar ${i < active ? 'done' : ''}"></li>` : ''}`).join('');
 }
 function show(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
@@ -275,7 +438,13 @@ let pendingResolve = null;
 let wakeLock = null;
 
 const chk = run => { if (run.cancelled) throw new Error('cancel'); };
-function setStatus(ear, freq) { $('#t-ear').textContent = ear; $('#t-freq').textContent = freq; }
+function setStatus(ear, freq, side) {
+  $('#t-ear').textContent = ear || '준비 중';
+  $('#t-freq').textContent = freq;
+  const s = side || 'B';
+  $('#stage').style.setProperty('--sc', SIDE_COL[s]);
+  $('#t-side').textContent = s === 'B' ? '♪' : s;
+}
 function setProgress(p) { $('#t-bar').style.width = Math.round(p * 100) + '%'; }
 
 function flash() {
@@ -314,7 +483,10 @@ function releaseWake() { try { wakeLock && wakeLock.release(); } catch (e) {} wa
 
 function promptUser(run, badge, title, text, btn) {
   run.active = false;
-  $('#ov-badge').textContent = badge; $('#ov-title').textContent = title;
+  const ob = $('#ov-badge');
+  ob.textContent = badge;
+  ob.style.setProperty('--sc', SIDE_COL[badge === 'R' || badge === 'L' ? badge : 'B']);
+  $('#ov-title').textContent = title;
   $('#ov-text').textContent = text; $('#ov-btn').textContent = btn || '시작';
   $('#overlay').classList.remove('hidden'); $('#overlay').classList.add('flex');
   return new Promise(res => {
@@ -385,7 +557,7 @@ async function measure(run, side, f) {
 
 function reliabilityOf(r) {
   const fa = r.catchFalse + Math.floor(r.stray / 2);
-  return fa <= 1 ? { label: '높음', c: '#15803d', fa } : fa <= 3 ? { label: '보통', c: '#a16207', fa } : { label: '낮음', c: '#b91c1c', fa };
+  return fa <= 1 ? { label: '높음', c: '#4ade80', fa } : fa <= 3 ? { label: '보통', c: '#facc15', fa } : { label: '낮음', c: '#f87171', fa };
 }
 
 async function runStandard(run) {
@@ -393,9 +565,10 @@ async function runStandard(run) {
   const total = FREQS.length * 2; let done = 0;
   for (const side of ['R', 'L']) {
     const name = side === 'R' ? '오른쪽 귀' : '왼쪽 귀';
-    await promptUser(run, side === 'R' ? 'R' : 'L', name + ' 검사', '소리가 들리면 버튼을 누르세요. 아주 작은 소리가 나올 수 있으니 집중하세요.', name + ' 검사 시작');
+    setStatus(name, '', side);
+    await promptUser(run, side, name + ' 검사', '소리가 들리면 버튼을 누르세요. 아주 작은 소리가 나올 수 있으니 집중하세요.', name + ' 검사 시작');
     for (const f of FREQS) {
-      setStatus(name, fmtF(f)); setProgress(done / total);
+      setStatus(name, fmtF(f), side); setProgress(done / total);
       const th = await measure(run, side, f);
       run.thr[side][f] = th; done++; setProgress(done / total);
       if (f === 1000) {
@@ -412,11 +585,12 @@ async function runStandard(run) {
 async function runHF(run) {
   const nyq = ensureCtx().sampleRate / 2;
   const list = HF_FREQS.filter(f => f < nyq * 0.92);
+  setStatus('양쪽 귀', '', 'B');
   await promptUser(run, '♪', '고음 가청 한계 테스트', '높은 음부터 점점 더 높아집니다. 들리면 버튼을 누르세요. 안 들리는 음에서는 누르지 마세요.', '시작');
   const items = []; let fails = 0;
   for (let i = 0; i < list.length; i++) {
     const f = list[i];
-    setStatus('양쪽 귀', fmtF(f)); setProgress(i / list.length);
+    setStatus('양쪽 귀', fmtF(f), 'B'); setProgress(i / list.length);
     let hits = 0, fa = 0;
     for (const k of shuffle(['T', 'T', 'C'])) {
       const h = await trial(run, 'B', f, HF_DB, k === 'C');
@@ -436,7 +610,7 @@ async function startTest() {
   const mode = document.querySelector('input[name=mode]:checked').value;
   ensureCtx();
   const run = cur = { cancelled: false, active: false, phase: 'wait', pressed: false, toneStart: 0, stray: 0, catchTotal: 0, catchFalse: 0 };
-  show('v-test'); setProgress(0); setStatus('', '');
+  show('v-test'); setProgress(0); setStatus('', '', 'B');
   requestWake();
   try {
     if (mode === 'std') await runStandard(run); else await runHF(run);
@@ -466,7 +640,7 @@ function renderHistory() {
       const ys = r.items.filter(x => x.s === 'yes').map(x => x.f);
       sum = '고음 · ' + (ys.length ? '약 ' + (Math.max(...ys) / 1000) + 'kHz' : '측정 불가');
     }
-    return `<button data-i="${i}" class="hist tap w-full text-left rounded-lg border border-slate-200 hover:bg-slate-50 px-3 py-2 text-sm flex justify-between gap-2"><span class="text-slate-500">${fmtDate(r.t)}</span><span class="font-medium">${sum}</span></button>`;
+    return `<button data-i="${i}" class="hist tap"><span class="muted num">${fmtDate(r.t)}</span><span class="font-medium">${sum}</span></button>`;
   }).join('');
   document.querySelectorAll('.hist').forEach(b => b.onclick = () => {
     const r = loadHistory()[+b.dataset.i]; if (!r) return;
@@ -521,39 +695,43 @@ function findings(rec, c) {
 
 /* ================= 청력도 SVG ================= */
 function audiogramSVG(c) {
-  const W = 640, H = 420, m = { l: 58, r: 20, t: 36, b: 48 };
+  const W = 640, H = 420, m = { l: 58, r: 22, t: 40, b: 50 };
   const pw = W - m.l - m.r, ph = H - m.t - m.b, y0 = -10, y1 = 90;
   const X = i => m.l + pw * (i + 0.5) / FREQS_SORTED.length;
   const Y = v => m.t + ph * (v - y0) / (y1 - y0);
-  const zones = [[-10, 25, '#dcfce7'], [25, 40, '#fef9c3'], [40, 55, '#ffedd5'], [55, 70, '#fee2e2'], [70, 90, '#f3e8ff']];
-  let s = `<svg xmlns="http://www.w3.org/2000/svg" id="audiogram" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;height:auto;background:#fff" font-family="sans-serif">`;
-  s += `<rect width="${W}" height="${H}" fill="#fff"/>`;
+  const zones = [[-10, 25, BANDS[0].z], [25, 40, BANDS[1].z], [40, 55, BANDS[2].z], [55, 70, BANDS[3].z], [70, 90, BANDS[4].z]];
+  const RC = '#fb7185', LC = '#60a5fa', BG = '#0a0f1f';
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" id="audiogram" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="width:100%;height:auto;display:block" font-family="Pretendard Variable, Pretendard, sans-serif">`;
+  s += `<defs><linearGradient id="bgG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101731"/><stop offset="1" stop-color="${BG}"/></linearGradient></defs>`;
+  s += `<rect width="${W}" height="${H}" fill="url(#bgG)"/>`;
   zones.forEach(z => s += `<rect x="${m.l}" y="${Y(z[0])}" width="${pw}" height="${Y(z[1]) - Y(z[0])}" fill="${z[2]}"/>`);
   for (let v = y0; v <= y1; v += 10) {
-    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#cbd5e1" stroke-width="1"/>`;
-    s += `<text x="${m.l - 8}" y="${Y(v) + 4}" font-size="12" text-anchor="end" fill="#475569">${v}</text>`;
+    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.08)" stroke-width="1"/>`;
+    s += `<text x="${m.l - 10}" y="${Y(v) + 4}" font-size="11" text-anchor="end" fill="#8f99b0">${v}</text>`;
   }
   FREQS_SORTED.forEach((f, i) => {
-    s += `<line x1="${X(i)}" x2="${X(i)}" y1="${m.t}" y2="${H - m.b}" stroke="#cbd5e1" stroke-width="1"/>`;
-    s += `<text x="${X(i)}" y="${H - m.b + 20}" font-size="12" text-anchor="middle" fill="#475569">${f >= 1000 ? f / 1000 + 'k' : f}</text>`;
+    s += `<line x1="${X(i)}" x2="${X(i)}" y1="${m.t}" y2="${H - m.b}" stroke="rgba(255,255,255,.08)" stroke-width="1"/>`;
+    s += `<text x="${X(i)}" y="${H - m.b + 20}" font-size="12" text-anchor="middle" fill="#aeb7cc">${f >= 1000 ? f / 1000 + 'k' : f}</text>`;
   });
-  s += `<text x="${m.l + pw / 2}" y="${H - 8}" font-size="12" text-anchor="middle" fill="#64748b">주파수 (Hz)</text>`;
-  s += `<text transform="translate(14 ${m.t + ph / 2}) rotate(-90)" font-size="12" text-anchor="middle" fill="#64748b">추정 청력 수준 (dB, 위가 잘 들림)</text>`;
-  const series = { R: { col: '#dc2626' }, L: { col: '#2563eb' } };
+  s += `<text x="${m.l + pw / 2}" y="${H - 10}" font-size="11" text-anchor="middle" fill="#6d7894" letter-spacing="1.5">FREQUENCY (Hz)</text>`;
+  s += `<text transform="translate(15 ${m.t + ph / 2}) rotate(-90)" font-size="11" text-anchor="middle" fill="#6d7894" letter-spacing="1.5">추정 청력 수준 (dB)</text>`;
+  const cols = { R: RC, L: LC };
   for (const side of ['R', 'L']) {
-    const col = series[side].col;
+    const col = cols[side];
     const pts = FREQS_SORTED.map((f, i) => c.hl[side][f] ? { i, ...c.hl[side][f] } : null).filter(Boolean);
-    s += `<polyline fill="none" stroke="${col}" stroke-width="2" ${side === 'L' ? 'stroke-dasharray="6 4"' : ''} points="${pts.map(p => X(p.i) + ',' + Y(p.v)).join(' ')}"/>`;
+    const poly = pts.map(p => X(p.i) + ',' + Y(p.v)).join(' ');
+    s += `<polyline fill="none" stroke="${col}" stroke-opacity=".18" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" points="${poly}"/>`;
+    s += `<polyline fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" ${side === 'L' ? 'stroke-dasharray="6 4"' : ''} points="${poly}"/>`;
     pts.forEach(p => {
       const x = X(p.i), y = Y(p.v);
-      if (side === 'R') s += `<circle cx="${x}" cy="${y}" r="7" fill="#fff" stroke="${col}" stroke-width="2.5"/>`;
+      if (side === 'R') s += `<circle cx="${x}" cy="${y}" r="7" fill="${BG}" stroke="${col}" stroke-width="2.5"/>`;
       else s += `<path d="M${x - 6} ${y - 6}L${x + 6} ${y + 6}M${x + 6} ${y - 6}L${x - 6} ${y + 6}" stroke="${col}" stroke-width="2.8" stroke-linecap="round"/>`;
-      if (p.limit) s += `<path d="M${x} ${y + 10}v10m-4 -4l4 4l4 -4" fill="none" stroke="${col}" stroke-width="2"/>`;
+      if (p.limit) s += `<path d="M${x} ${y + 11}v10m-4 -4l4 4l4 -4" fill="none" stroke="${col}" stroke-width="2"/>`;
     });
   }
-  s += `<circle cx="${m.l + 10}" cy="16" r="6" fill="#fff" stroke="#dc2626" stroke-width="2.5"/><text x="${m.l + 22}" y="20" font-size="12" fill="#334155">오른쪽</text>`;
-  s += `<path d="M${m.l + 90} 10l10 10m0 -10l-10 10" stroke="#2563eb" stroke-width="2.8" stroke-linecap="round"/><text x="${m.l + 106}" y="20" font-size="12" fill="#334155">왼쪽</text>`;
-  s += `<text x="${W - m.r}" y="20" font-size="11" text-anchor="end" fill="#64748b">▼ = 최대 음량에서도 미응답(측정 한계)</text>`;
+  s += `<circle cx="${m.l + 10}" cy="18" r="6" fill="${BG}" stroke="${RC}" stroke-width="2.5"/><text x="${m.l + 24}" y="22" font-size="12" fill="#cbd3e4">오른쪽</text>`;
+  s += `<path d="M${m.l + 92} 12l10 10m0 -10l-10 10" stroke="${LC}" stroke-width="2.8" stroke-linecap="round"/><text x="${m.l + 108}" y="22" font-size="12" fill="#cbd3e4">왼쪽</text>`;
+  s += `<text x="${W - m.r}" y="22" font-size="11" text-anchor="end" fill="#6d7894">▼ 최대 음량에서도 미응답(측정 한계)</text>`;
   s += '</svg>';
   return s;
 }
@@ -564,7 +742,7 @@ function savePNG() {
   const img = new Image();
   img.onload = () => {
     const cv = document.createElement('canvas'); cv.width = 1280; cv.height = 840;
-    const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height);
+    const g = cv.getContext('2d'); g.fillStyle = '#0a0f1f'; g.fillRect(0, 0, cv.width, cv.height);
     g.drawImage(img, 0, 0, cv.width, cv.height);
     cv.toBlob(b => {
       const a = document.createElement('a'); a.href = URL.createObjectURL(b);
@@ -576,10 +754,10 @@ function savePNG() {
 
 /* ================= 결과 화면 ================= */
 function actionButtons(png) {
-  return `<div class="flex flex-wrap gap-2 mt-5 no-print">
-    ${png ? '<button id="btn-png" class="tap flex-1 min-w-[120px] rounded-xl border border-slate-300 py-2.5 text-sm font-semibold hover:bg-slate-50">청력도 이미지 저장</button>' : ''}
-    <button id="btn-print" class="tap flex-1 min-w-[120px] rounded-xl border border-slate-300 py-2.5 text-sm font-semibold hover:bg-slate-50">인쇄 / PDF</button>
-    <button id="btn-retry" class="tap flex-1 min-w-[120px] rounded-xl bg-indigo-600 text-white py-2.5 text-sm font-semibold hover:bg-indigo-700">처음으로</button>
+  return `<div class="flex flex-wrap gap-2.5 mt-5 no-print">
+    ${png ? '<button id="btn-png" class="btn btn-ghost tap flex-1 min-w-[120px] py-3 text-sm">청력도 이미지 저장</button>' : ''}
+    <button id="btn-print" class="btn btn-ghost tap flex-1 min-w-[120px] py-3 text-sm">인쇄 / PDF</button>
+    <button id="btn-retry" class="btn btn-primary tap flex-1 min-w-[120px] py-3 text-sm">처음으로</button>
   </div>`;
 }
 function bindActions() {
@@ -587,42 +765,46 @@ function bindActions() {
   $('#btn-print').onclick = () => window.print();
   $('#btn-retry').onclick = () => { renderHistory(); show('v-intro'); };
 }
-const chip = (o) => { if (!o) return '-'; const b = band(o.v); return `<span class="inline-block rounded-full px-2 py-0.5 text-xs font-semibold" style="background:${b.bg};color:${b.c}">${o.limit ? '≥' : ''}${o.v} dB</span>`; };
+const chip = (o) => { if (!o) return '-'; const b = band(o.v); return `<span class="chip bt" style="background:${b.bg};color:${b.c}">${o.limit ? '≥' : ''}${o.v} dB</span>`; };
+
+function gauge(v, col) {
+  const r = 46, C = 2 * Math.PI * r, ratio = Math.max(0.05, Math.min(1, (90 - v) / 100));
+  return `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+    <circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C * ratio).toFixed(1)} ${C.toFixed(1)}" style="filter:drop-shadow(0 0 6px ${col}99)"/></svg>`;
+}
 
 function showStd(rec, fromHistory) {
   show('v-result');
   const box = $('#result-body');
   const c = computeStd(rec);
-  if (!c) { box.innerHTML = '<div class="rounded-2xl bg-white border p-5">기준음(1kHz)을 측정하지 못해 결과를 계산할 수 없습니다. 볼륨과 연결을 확인하고 다시 검사하세요.</div>' + actionButtons(false); bindActions(); return; }
+  if (!c) { box.innerHTML = '<div class="card p-6 text-sm">기준음(1kHz)을 측정하지 못해 결과를 계산할 수 없습니다. 볼륨과 연결을 확인하고 다시 검사하세요.</div>' + actionButtons(false); bindActions(); return; }
   const f = findings(rec, c);
-  const card = (s, name, col) => {
-    const p = c.pta[s], b = band(p.v);
-    return `<div class="rounded-2xl border p-4 text-center" style="border-color:${col}55;background:${b.bg}">
-      <div class="text-xs font-semibold" style="color:${col}">${name}</div>
-      <div class="text-3xl font-black mt-1" style="color:${b.c}">${p.limit ? '≥' : ''}${p.v}<span class="text-base font-semibold"> dB</span></div>
-      <div class="text-sm font-semibold mt-0.5" style="color:${b.c}">${b.name}</div></div>`;
+  const earCard = (s, name) => {
+    const p = c.pta[s], b = band(p.v), sc = SIDE_COL[s];
+    return `<div class="ear-card" style="--gl:${sc}">
+      <div class="inline-flex items-center gap-2 text-xs font-semibold" style="color:${sc}"><span style="width:7px;height:7px;border-radius:9999px;background:${sc};box-shadow:0 0 10px ${sc}"></span>${name}</div>
+      <div class="gauge">${gauge(p.v, b.c)}<div class="v"><b class="bt" style="color:${b.c}">${p.limit ? '≥' : ''}${p.v}</b><em>dB</em></div></div>
+      <span class="chip bt" style="background:${b.bg};color:${b.c}">${b.name}</span></div>`;
   };
   box.innerHTML = `
-    <div class="rounded-2xl bg-white border border-slate-200 p-5">
-      <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-        <h2 class="text-lg font-bold">표준 간이 검사 결과</h2>
-        <div class="text-xs text-slate-500">${fmtDate(rec.t)} · 신뢰도 <b style="color:${rec.rel.c}">${rec.rel.label}</b></div>
+    <div class="card p-6">
+      <div class="flex items-end justify-between flex-wrap gap-2 mb-5">
+        <div><div class="eyebrow mb-1">Result</div><h2 class="h-title text-2xl">표준 간이 검사 결과</h2></div>
+        <div class="text-xs muted num">${fmtDate(rec.t)} · 신뢰도 <b class="bt" style="color:${rec.rel.c}">${rec.rel.label}</b></div>
       </div>
-      <div class="grid grid-cols-2 gap-3 mb-4">${card('R', '오른쪽 귀 평균', '#dc2626')}${card('L', '왼쪽 귀 평균', '#2563eb')}</div>
-      <div class="rounded-xl border border-slate-200 overflow-hidden">${audiogramSVG(c)}</div>
-      <table class="w-full text-sm mt-4">
-        <thead><tr class="text-slate-500 text-xs border-b"><th class="text-left py-1.5">주파수</th><th class="text-center">오른쪽</th><th class="text-center">왼쪽</th></tr></thead>
-        <tbody>${FREQS_SORTED.map(fr => `<tr class="border-b last:border-0"><td class="py-1.5">${fmtF(fr)}</td><td class="text-center">${chip(c.hl.R[fr])}</td><td class="text-center">${chip(c.hl.L[fr])}</td></tr>`).join('')}</tbody>
+      <div class="grid grid-cols-2 gap-3 mb-5">${earCard('R', '오른쪽 귀 평균')}${earCard('L', '왼쪽 귀 평균')}</div>
+      <div class="rounded-2xl overflow-hidden" style="border:1px solid var(--line)">${audiogramSVG(c)}</div>
+      <table class="tbl mt-5">
+        <thead><tr><th>주파수</th><th>오른쪽</th><th>왼쪽</th></tr></thead>
+        <tbody>${FREQS_SORTED.map(fr => `<tr><td class="num">${fmtF(fr)}</td><td>${chip(c.hl.R[fr])}</td><td>${chip(c.hl.L[fr])}</td></tr>`).join('')}</tbody>
       </table>
-      <p class="text-[11px] text-slate-400 mt-2">값이 클수록 더 큰 소리가 필요했다는 뜻입니다. 25dB 이하를 정상 범위로 표시합니다. 5dB 단위 추정치입니다.</p>
+      <p class="text-[11px] mt-3 leading-relaxed" style="color:var(--faint)">값이 클수록 더 큰 소리가 필요했다는 뜻입니다. 25dB 이하를 정상 범위로 표시합니다. 5dB 단위 추정치입니다.</p>
     </div>
-    <div class="rounded-2xl bg-white border border-slate-200 p-5 mt-4">
-      <h3 class="font-bold mb-2">해석</h3>
-      <ul class="space-y-2 text-sm">${f.map(o => `<li class="flex gap-2"><span>${o.t === 'ok' ? '✅' : '⚠️'}</span><span>${o.m}</span></li>`).join('')}</ul>
+    <div class="card p-6 mt-4">
+      <h3 class="h-title text-lg mb-4">해석</h3>
+      <ul class="space-y-3 text-sm leading-relaxed">${f.map(o => `<li class="flex gap-3"><span class="ico ${o.t}">${o.t === 'ok' ? '✓' : '!'}</span><span class="muted" style="color:var(--text);opacity:.88">${o.m}</span></li>`).join('')}</ul>
     </div>
-    <div class="rounded-xl bg-slate-100 p-3 text-xs text-slate-500 mt-4">
-      <b>계산 방식:</b> 더 잘 들린 귀의 1kHz 역치를 0dB로 두고, 표준 헤드폰 기준값의 주파수별 차이를 보정해 상대적인 수준을 구했습니다. 헤드폰의 주파수 특성과 주변 소음에 따라 ±10dB 이상 달라질 수 있습니다.
-    </div>
+    <div class="tip mt-4"><b class="text-[var(--text)]">계산 방식</b> · 더 잘 들린 귀의 1kHz 역치를 0dB로 두고, 표준 헤드폰 기준값의 주파수별 차이를 보정해 상대적인 수준을 구했습니다. 헤드폰의 주파수 특성과 주변 소음에 따라 ±10dB 이상 달라질 수 있습니다.</div>
     ${actionButtons(true)}`;
   bindActions();
 }
@@ -632,36 +814,34 @@ function showHF(rec) {
   const ys = rec.items.filter(i => i.s === 'yes').map(i => i.f);
   const limit = ys.length ? Math.max(...ys) : null;
   const partial = rec.items.filter(i => i.s === 'partial' && (limit === null || i.f > limit)).map(i => i.f);
-  const col = { yes: ['#dcfce7', '#15803d', '들림'], partial: ['#fef9c3', '#a16207', '경계'], no: ['#f1f5f9', '#64748b', '안 들림'] };
+  const col = { yes: ['rgba(74,222,128,.13)', '#4ade80', '들림'], partial: ['rgba(250,204,21,.13)', '#facc15', '경계'], no: ['rgba(255,255,255,.04)', '#7c869f', '안 들림'] };
   const ages = [['10대', '17 ~ 20kHz'], ['20대', '16 ~ 19kHz'], ['30대', '15 ~ 17kHz'], ['40대', '13 ~ 16kHz'], ['50대', '11 ~ 14kHz'], ['60대 이상', '9 ~ 12kHz']];
   let note = '';
   if (limit === null) note = '8kHz도 확실히 듣지 못했습니다. 볼륨이 너무 낮거나 장치가 고음을 잘 내지 못했을 수 있습니다. 표준 간이 검사로 확인해 보세요.';
   else if (limit < 12000) note = '12kHz 아래에서 한계가 나왔습니다. 장치 영향도 있지만 고음 청력이 낮을 가능성이 있어 표준 간이 검사를 권합니다.';
   else note = '일상 대화에서 중요한 음역은 대부분 8kHz 이하입니다. 고음 한계는 나이에 따라 자연스럽게 낮아집니다.';
   $('#result-body').innerHTML = `
-    <div class="rounded-2xl bg-white border border-slate-200 p-5">
-      <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-        <h2 class="text-lg font-bold">고음 가청 한계 결과</h2>
-        <div class="text-xs text-slate-500">${fmtDate(rec.t)} · 신뢰도 <b style="color:${rec.rel.c}">${rec.rel.label}</b></div>
+    <div class="card p-6">
+      <div class="flex items-end justify-between flex-wrap gap-2 mb-5">
+        <div><div class="eyebrow mb-1">Result</div><h2 class="h-title text-2xl">고음 가청 한계 결과</h2></div>
+        <div class="text-xs muted num">${fmtDate(rec.t)} · 신뢰도 <b class="bt" style="color:${rec.rel.c}">${rec.rel.label}</b></div>
       </div>
-      <div class="rounded-2xl bg-indigo-50 text-center py-6 mb-4">
-        <div class="text-xs text-indigo-600 font-semibold">들린 최고 주파수</div>
-        <div class="text-5xl font-black text-indigo-700 mt-1">${limit ? (limit / 1000) + '<span class="text-2xl">kHz</span>' : '측정 불가'}</div>
-        ${partial.length ? `<div class="text-xs text-slate-500 mt-1">경계(불확실): ${partial.map(fmtF).join(', ')}</div>` : ''}
+      <div class="hero-hf mb-5">
+        <div class="eyebrow">Highest audible frequency</div>
+        <div class="serif mt-2 bt" style="font-size:3.6rem;line-height:1.1;font-weight:500;color:var(--gold)">${limit ? (limit / 1000) + '<span style="font-size:1.5rem;margin-left:4px">kHz</span>' : '<span style="font-size:1.8rem">측정 불가</span>'}</div>
+        ${partial.length ? `<div class="text-xs muted mt-2">경계(불확실): ${partial.map(fmtF).join(', ')}</div>` : ''}
       </div>
-      <div class="flex flex-wrap gap-2 mb-3">
-        ${rec.items.map(i => `<div class="rounded-lg px-3 py-2 text-center text-xs" style="background:${col[i.s][0]};color:${col[i.s][1]}"><div class="font-bold text-sm">${fmtF(i.f)}</div>${col[i.s][2]}</div>`).join('')}
+      <div class="flex flex-wrap gap-2 mb-4">
+        ${rec.items.map(i => `<div class="hfchip bt" style="background:${col[i.s][0]};color:${col[i.s][1]}"><b>${fmtF(i.f)}</b>${col[i.s][2]}</div>`).join('')}
       </div>
-      <p class="text-sm text-slate-600">${note}</p>
+      <p class="text-sm muted leading-relaxed">${note}</p>
     </div>
-    <div class="rounded-2xl bg-white border border-slate-200 p-5 mt-4">
-      <h3 class="font-bold mb-2">연령대별 대략적인 가청 상한</h3>
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">${ages.map(a => `<div class="rounded-lg bg-slate-50 px-3 py-2"><div class="text-xs text-slate-500">${a[0]}</div><div class="font-semibold">${a[1]}</div></div>`).join('')}</div>
-      <p class="text-[11px] text-slate-400 mt-2">일반적으로 알려진 대략적 범위이며 개인차가 큽니다.</p>
+    <div class="card p-6 mt-4">
+      <h3 class="h-title text-lg mb-4">연령대별 대략적인 가청 상한</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-sm">${ages.map(a => `<div class="agecell"><div class="text-xs muted">${a[0]}</div><div class="font-semibold mt-0.5 num">${a[1]}</div></div>`).join('')}</div>
+      <p class="text-[11px] mt-3" style="color:var(--faint)">일반적으로 알려진 대략적 범위이며 개인차가 큽니다.</p>
     </div>
-    <div class="rounded-xl bg-slate-100 p-3 text-xs text-slate-500 mt-4">
-      많은 이어폰·스피커는 16kHz 이상의 출력이 약하거나 없어서, 실제 청력보다 한계가 낮게 나올 수 있습니다. 기기의 샘플링 한계는 약 ${(rec.nyq / 1000).toFixed(1)}kHz입니다. 양쪽 귀를 동시에 검사하므로 좌우 차이는 알 수 없습니다.
-    </div>
+    <div class="tip mt-4">많은 이어폰·스피커는 16kHz 이상의 출력이 약하거나 없어서, 실제 청력보다 한계가 낮게 나올 수 있습니다. 기기의 샘플링 한계는 약 ${(rec.nyq / 1000).toFixed(1)}kHz입니다. 양쪽 귀를 동시에 검사하므로 좌우 차이는 알 수 없습니다.</div>
     ${actionButtons(false)}`;
   bindActions();
 }
